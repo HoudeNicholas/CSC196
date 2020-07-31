@@ -5,7 +5,15 @@
 
 void nc::Shape::Draw(Core::Graphics& graphics, const nc::transform& transform)
 {
-	Draw(graphics, transform.position, transform.scale, transform.angle);
+	for (size_t i = 0; i < this->m_points.size() - 1; i++) {
+		nc::Vector2 p1 = m_points[i];
+		nc::Vector2 p2 = m_points[i + 1];
+
+		p1 = p1 * transform.matrix;
+		p2 = p2 * transform.matrix;
+
+		graphics.DrawLine(p1.x, p1.y, p2.x, p2.y);
+	}
 }
 
 bool nc::Shape::load(const std::string& filename)
@@ -17,8 +25,8 @@ bool nc::Shape::load(const std::string& filename)
 		success = true;
 		//read color
 		stream >> m_color;
-
-		//get # of points
+		
+			//get # of points
 		size_t size;
 		std::string line;
 		std::getline(stream, line);
@@ -42,18 +50,23 @@ void nc::Shape::Draw(Core::Graphics& graphics, nc::Vector2 position, float scale
 {
 	graphics.SetColor(this->getColor());
 
+	nc::Matrix33 mxScale;
+	mxScale.scale(scale);
+
+	nc::Matrix33 rotate;
+	rotate.rotate(angle);
+
+	nc::Matrix33 translate;
+	translate.translate(position);
+
+	nc::Matrix33 mx = mxScale * rotate * translate;
+
 	for (size_t i = 0; i < this->m_points.size() - 1; i++) {
 		nc::Vector2 p1 = m_points[i];
 		nc::Vector2 p2 = m_points[i + 1];
 
-		p1 *= scale;
-		p2 *= scale;
-
-		p1 = nc::Vector2::rotate(p1, angle);
-		p2 = nc::Vector2::rotate(p2, angle);
-
-		p1 += position;
-		p2 += position;
+		p1 = p1 * mx;
+		p2 = p2 * mx;
 
 		graphics.DrawLine(p1.x, p1.y, p2.x, p2.y);
 	}

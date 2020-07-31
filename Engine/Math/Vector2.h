@@ -7,6 +7,10 @@ namespace nc {
 	struct Vector2 {
 		float x, y;
 
+		float& operator [] (size_t index) { return (&x)[index]; }
+
+		const float& operator [] (size_t index) const { return (&x)[index]; }
+
 		Vector2() : x{ 0 }, y{ 0 } {}
 		Vector2(float x, float y) : x{ x }, y{ y } {}
 		Vector2(int x, int y) : x{ static_cast<float>(x) }, y{ static_cast<float>(y) } {}
